@@ -535,7 +535,7 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.0.0.tgz#54d1de30911635020c383cb73b160b698e7ae179"
   integrity sha512-UcIJl/vUVjTr3H1yYXZi7Sr2PlXzBEHVUJKOUlVyzyy0FI8oQCCy0Wx+BuK/fojdnmLeMvUk4KUvhKUybP+C7Q==
 
-"@openzeppelin/test-environment@^0.1.4":
+"@openzeppelin/test-environment@^0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@openzeppelin/test-environment/-/test-environment-0.1.9.tgz#d49ec53a1de946e7c7beb3c672394ccffbeabdf0"
   integrity sha512-QJ2TSRGbHMv4lrLChT7ghcoPGB3osXZvLXM3VqD8XhrJsYi/t5QJ8aHNYKa+A8EmCkH/rGZWgvRfhphVTFf0DA==
@@ -3102,6 +3102,16 @@ eth-sig-util@^2.5.2:
   integrity sha512-aCMBwp8q/4wrW4QLsF/HYBOSA7TpLKmkVwP3pYQNkEEseW2Rr8Z5Uxc9/h6HX+OG3tuHo+2bINVSihIeBfym6A==
   dependencies:
     ethereumjs-abi "0.6.8"
+    ethereumjs-util "^5.1.1"
+    tweetnacl "^1.0.3"
+    tweetnacl-util "^0.15.0"
+
+eth-sig-util@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/eth-sig-util/-/eth-sig-util-3.0.1.tgz#8753297c83a3f58346bd13547b59c4b2cd110c96"
+  integrity sha512-0Us50HiGGvZgjtWTyAI/+qTzYPMLy5Q451D0Xy68bxq1QMWdoOddDwGvsqcFT27uohKgalM9z/yxplyt+mY2iQ==
+  dependencies:
+    ethereumjs-abi "^0.6.8"
     ethereumjs-util "^5.1.1"
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.0"
