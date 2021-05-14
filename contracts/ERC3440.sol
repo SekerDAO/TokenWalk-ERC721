@@ -39,15 +39,19 @@ abstract contract ERC3440 is ERC721URIStorage {
     
     // Optional mapping for signatures
     mapping (uint256 => bytes) private _signatures;
+
+    // the last nft minted
+    uint public topId;
     
     // A view to display the artist's address
     address public artist;
 
     // A view to display the total number of prints created
-    uint public editionSupply = 0;
+    // mapping original Id to number of prints
+    mapping (uint => uint) public editionSupplies;
     
-    // A view to display which ID is the original copy
-    uint public originalId = 0;
+    // A view to display an array of IDs that mark the original copy
+    uint[] public originalIds;
     
     // A signed token event
     event Signed(address indexed from, uint256 indexed tokenId);
@@ -64,42 +68,22 @@ abstract contract ERC3440 is ERC721URIStorage {
         artist = _artist;
     }
     
-    /**
-     * @dev Sets `tokenId as the original print` as the tokenURI of `tokenId`.
-     * @param _tokenId the nft id of the original print
-     */
-    function _designateOriginal(uint256 _tokenId) internal virtual {
-        require(msg.sender == artist, "ERC721Extensions: only the artist may designate originals");
-        require(_exists(_tokenId), "ERC721Extensions: Original query for nonexistent token");
-        require(originalId == 0, "ERC721Extensions: Original print has already been designated as a different Id");
-
-        // If there is no special designation for the original, set it.
-        originalId = _tokenId;
-    }
-    
-
-    /**
-     * @dev Sets total number printed editions of the original as the tokenURI of `tokenId`.
-     * @param _maxEditionSupply max supply
-     */
-    function _setLimitedEditions(uint256 _maxEditionSupply) internal virtual {
-        require(msg.sender == artist, "ERC721Extensions: only the artist may designate max supply");
-        require(editionSupply == 0, "ERC721Extensions: Max number of prints has already been created");
-
-        // If there is no max supply of prints, set it. Leaving supply at 0 indicates there are no prints of the original
-        editionSupply = _maxEditionSupply;
-    }
 
     /**
      * @dev Creates `tokenIds` representing the printed editions.
      * @param _tokenURI the metadata attached to each nft
      */
-    function _createEditions(string memory _tokenURI) internal virtual {
+    function _createEditions(string memory _tokenURI, uint256 _editionSupply) internal virtual {
         require(msg.sender == artist, "ERC721Extensions: only the artist may create prints");
-        require(editionSupply > 0, "ERC721Extensions: the edition supply is not set to more than 0");
-        for(uint i=0; i < editionSupply; i++) {
-            _mint(msg.sender, i);
-            _setTokenURI(i, _tokenURI);
+        require(_editionSupply > 0, "ERC721Extensions: the edition supply is not set to more than 0");
+
+        originalIds.push(topId+1);
+        editionSupplies[topId+1] = _editionSupply;
+
+        for(uint i=1; i < _editionSupply+1; i++) {
+            _mint(msg.sender, topId+i);
+            _setTokenURI(topId+i, _tokenURI);
+            topId++;
         }
     }
 
