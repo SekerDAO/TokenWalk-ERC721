@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 /**
  * @dev ERC721 token with editions extension.
  */
-abstract contract ERC3440 is ERC721URIStorage {
+abstract contract TokenWalkDomain is ERC721URIStorage {
 
     // eip-712
     struct EIP712Domain {
@@ -24,6 +24,13 @@ abstract contract ERC3440 is ERC721URIStorage {
         string artist;
         address wallet;
         string contents;
+    }
+
+    //
+    struct SpaceOwner {
+        uint startIndex;
+        uint length;
+        address owner;
     }
 
     // type hashes
@@ -43,42 +50,29 @@ abstract contract ERC3440 is ERC721URIStorage {
     // the last nft minted
     uint public topId;
     
-    // A view to display the artist's address
-    address public artist;
-
-    // A view to display the total number of prints created
-    // mapping original Id to number of prints
-    mapping (uint => uint) public editionSupplies;
+    // 
+    mapping (uint => SpaceOwner) public editionSpaces;
     
     // A view to display an array of IDs that mark the original copy
     uint[] public originalIds;
     
     // A signed token event
     event Signed(address indexed from, uint256 indexed tokenId);
-
-    /**
-     * @dev Sets `artist` as the original artist.
-     * @param _artist the wallet of the signing artist (TODO consider multiple
-     * signers and contract signers (non-EOA)
-     */
-    function _designateArtist(address _artist) internal virtual {
-        require(artist == address(0), "ERC721Extensions: the artist has already been set");
-
-        // If there is no special designation for the artist, set it.
-        artist = _artist;
-    }
     
+    function _designateEditionSpace(uint _editionSupply) internal virtual {
+        editionSpaces[topId+1].startIndex = topId+1;
+        editionSpaces[topId+1].length = _editionSupply;
+        editionSpaces[topId+1].owner = msg.sender;
+    }
 
     /**
      * @dev Creates `tokenIds` representing the printed editions.
      * @param _tokenURI the metadata attached to each nft
      */
     function _createEditions(string memory _tokenURI, uint256 _editionSupply) internal virtual {
-        require(msg.sender == artist, "ERC721Extensions: only the artist may create prints");
         require(_editionSupply > 0, "ERC721Extensions: the edition supply is not set to more than 0");
 
         originalIds.push(topId+1);
-        editionSupplies[topId+1] = _editionSupply;
 
         for(uint i=1; i < _editionSupply+1; i++) {
             _mint(msg.sender, topId+i);
@@ -118,14 +112,16 @@ abstract contract ERC3440 is ERC721URIStorage {
      *
      * Emits a {Signed} event.
      */
-    function _signEdition(uint256 _tokenId, Signature memory _message, bytes memory _signature) internal virtual {
-        require(msg.sender == artist, "ERC721Extensions: only the artist may sign their work");
+    function _signEdition(uint256 _originalId, uint256 _tokenId, Signature memory _message, bytes memory _signature) internal virtual {
+        require(msg.sender == editionSpaces[_originalId].owner, "ERC721Extensions: only the artist may sign their work");
+        uint endIndex = editionSpaces[_originalId].startIndex + editionSpaces[_originalId].length;
+        require(_tokenId <= endIndex && _tokenId >= editionSpaces[_originalId].startIndex, "ERC721Extensions: tokenId is not within owners range");
         require(_signatures[_tokenId].length == 0, "ERC721Extensions: this token is already signed");
         bytes32 digest = _hash(_message);
         address recovered = ECDSA.recover(digest, _signature);
-        require(recovered == artist, "ERC721Extensions: artist signature mismatch");
+        require(recovered == editionSpaces[_originalId].owner, "ERC721Extensions: artist signature mismatch");
         _signatures[_tokenId] = _signature;
-        emit Signed(artist, _tokenId);
+        emit Signed(msg.sender, _tokenId);
     }
 
     
@@ -147,10 +143,10 @@ abstract contract ERC3440 is ERC721URIStorage {
      * @return bool true if signed by artist
      * The artist may broadcast signature out of band that will verify on the nft
      */
-    function isSigned(Signature memory _message, bytes memory _signature, uint _tokenId) external view virtual returns (bool) {
+    function isSigned(uint256 _originalId, Signature memory _message, bytes memory _signature, uint _tokenId) external view virtual returns (bool) {
         bytes32 messageHash = _hash(_message);
         address _artist = ECDSA.recover(messageHash, _signature);
-        return (_artist == artist && _equals(_signatures[_tokenId], _signature));
+        return (_artist == editionSpaces[_originalId].owner && _equals(_signatures[_tokenId], _signature));
     }
 
     /**

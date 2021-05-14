@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.0;
 
-import "./ERC3440.sol";
+import "./TokenWalkDomain.sol";
 
 /**
  * @dev ERC721 token with editions extension.
  */
-contract MultiArtToken is ERC3440 {
+contract MultiWalkToken is TokenWalkDomain {
 
     /**
      * @dev Sets `address artist` as the original artist to the account deploying the NFT.
@@ -16,11 +16,10 @@ contract MultiArtToken is ERC3440 {
         string memory _name, 
         string memory _symbol
     ) ERC721(_name, _symbol) {
-        _designateArtist(msg.sender);
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712DOMAIN_TYPEHASH,
-            keccak256(bytes("Artist's Domain")),
+            keccak256(bytes("Token Walk")),
             keccak256(bytes("1")),
             1,
             address(this)
@@ -30,14 +29,15 @@ contract MultiArtToken is ERC3440 {
     /**
      * @dev Signs a `tokenId` representing a print.
      */
-    function sign(uint256 tokenId, Signature memory message, bytes memory signature) public {
-        _signEdition(tokenId, message, signature);
+    function sign(uint256 _originalId, uint256 _tokenId, Signature memory _message, bytes memory _signature) public {
+        _signEdition(_originalId, _tokenId, _message, _signature);
     }
 
     /**
      * @dev Signs a `tokenId` representing a print.
      */
     function mintEdition(uint _editionNumbers, string memory _tokenURI) public {
+        _designateEditionSpace(_editionNumbers);
         _createEditions(_tokenURI, _editionNumbers);
     }
 }
