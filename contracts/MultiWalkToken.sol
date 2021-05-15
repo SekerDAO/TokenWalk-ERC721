@@ -43,7 +43,7 @@ contract MultiWalkToken is TokenWalkDomain {
     /**
      * @dev Signs a `tokenId` representing a print.
      */
-    function mintEdition(uint _editionNumbers, string memory _tokenURI) public {
-        _createEditions(_tokenURI, _editionNumbers);
+    function mintEdition(uint _editionNumbers) public {
+        _createEditions(_editionNumbers);
     }
 }
