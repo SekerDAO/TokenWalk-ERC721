@@ -26,6 +26,13 @@ contract MultiWalkToken is TokenWalkDomain {
         ));
     }
     
+     /**
+     * @dev OVERRIDE Base URI for computing {tokenURI}.
+     */
+    function _baseURI() internal view virtual override returns (string memory) {
+        return "https://tokenwalk.com/nfts/";
+    }
+
     /**
      * @dev Signs a `tokenId` representing a print.
      */

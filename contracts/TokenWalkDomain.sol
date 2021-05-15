@@ -42,7 +42,7 @@ abstract contract TokenWalkDomain is ERC721URIStorage {
 
     mapping (uint256 => address) private _artists;
 
-    uint256 public topId = 0;
+    uint256 public topId = 1;
     
     // A signed token event
     event Signed(address indexed from, uint256 indexed tokenId);
@@ -54,11 +54,11 @@ abstract contract TokenWalkDomain is ERC721URIStorage {
     function _createEditions(string memory _tokenURI, uint256 _editionSupply) internal virtual {
         require(_editionSupply > 0, "ERC721Extensions: the edition supply is not set to more than 0");
 
-        for(uint i=1; i < _editionSupply+1; i++) {
-            _mint(msg.sender, topId+i);
-            _setTokenURI(topId+i, _tokenURI);
-            topId++;
+        for(uint i=0; i < _editionSupply; i++) { //0, 1+2
+            _mint(msg.sender, topId);
+            _setTokenURI(topId, _tokenURI);
             _artists[topId] = msg.sender;
+            topId++;
         }
     }
 
