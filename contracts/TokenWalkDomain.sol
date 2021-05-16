@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * @dev ERC721 token with editions extension.
  */
 abstract contract TokenWalkDomain is ERC721URIStorage {
+    using Strings for uint256;
 
     // eip-712
     struct EIP712Domain {
@@ -56,7 +57,7 @@ abstract contract TokenWalkDomain is ERC721URIStorage {
 
         for(uint i=0; i < _editionSupply; i++) { //0, 1+2
             _mint(msg.sender, topId);
-            _setTokenURI(topId, _tokenURI);
+            _setTokenURI(topId, string(abi.encodePacked(_tokenURI, topId.toString(), ".json")));
             _artists[topId] = msg.sender;
             topId++;
         }
